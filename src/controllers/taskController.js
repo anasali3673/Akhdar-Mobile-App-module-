@@ -15,8 +15,8 @@ exports.createTask = async (req, res) => {
       author,
       deadline,
     });
-    task = await task.populate("author");
-    // await task.save();
+
+    task = await Task.findById(task._id).populate("author");
 
     res.status(201).json({ msg: "Task created successfully", task });
   } catch (err) {
@@ -26,7 +26,7 @@ exports.createTask = async (req, res) => {
 };
 
 exports.getTaskById = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
   try {
     const task = await Task.findById(id).populate("author");
     if (!task) {
@@ -41,7 +41,7 @@ exports.getTaskById = async (req, res) => {
 
 exports.getAllTasks = async (req, res) => {
   try {
-    const tasks = await Task.find();
+    const tasks = await Task.find().populate("author");
     res.json(tasks);
   } catch (err) {
     console.error(err.message);
@@ -51,20 +51,16 @@ exports.getAllTasks = async (req, res) => {
 
 exports.updateTask = async (req, res) => {
   const { id } = req.params;
-  const { title, description, author, deadline } = req.body;
+  const updates = req.body;
 
   try {
-    let task = await Task.findById(id);
+    let task = await Task.findByIdAndUpdate(id, updates, {
+      new: true,
+    }).populate("author");
     if (!task) {
       return res.status(404).json({ msg: "Task not found" });
     }
 
-    if (title) task.title = title;
-    if (description) task.description = description;
-    if (author) task.author = author;
-    if (deadline) task.deadline = deadline;
-
-    await task.save();
     res.json({ msg: "Task updated successfully", task });
   } catch (err) {
     console.error(err.message);

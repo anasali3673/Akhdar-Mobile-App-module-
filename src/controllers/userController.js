@@ -22,12 +22,10 @@ exports.registerUser = async (req, res) => {
 
     await user.save();
 
-    res
-      .status(201)
-      .json({
-        msg: "User registered successfully",
-        user: { fullName: user.fullName, email: user.email, id: user._id },
-      });
+    res.status(201).json({
+      msg: "User registered successfully",
+      user: { fullName: user.fullName, email: user.email, id: user._id },
+    });
   } catch (err) {
     res.status(500).send("Server error");
   }
@@ -45,7 +43,7 @@ exports.getUserById = async (req, res) => {
       email: user.email,
     });
   } catch (err) {
-    console.error(err.message);
+    console.log(err.message);
     res.status(500).send("Server error");
   }
 };
@@ -55,7 +53,7 @@ exports.getAllUsers = async (req, res) => {
     const users = await User.find({});
     res.json(users);
   } catch (err) {
-    console.error(err.message);
+    console.log(err.message);
     res.status(500).send("Server error");
   }
 };
@@ -65,17 +63,15 @@ exports.updateUser = async (req, res) => {
   const { fullName } = req.body;
 
   try {
-    let user = await User.findById(id);
+    let user = await User.findByIdAndUpdate(id, { fullName }, { new: true });
+
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    if (fullName) user.fullName = fullName;
-
-    await user.save();
     res.json({ msg: "User updated successfully", user });
   } catch (err) {
-    console.error(err.message);
+    console.log(err.message);
     res.status(500).send("Server error");
   }
 };
@@ -92,7 +88,7 @@ exports.deleteUser = async (req, res) => {
     await User.deleteOne({ _id: id });
     res.json({ msg: "User deleted successfully", user });
   } catch (err) {
-    console.error(err.message);
+    console.log(err.message);
     res.status(500).send("Server error");
   }
 };
